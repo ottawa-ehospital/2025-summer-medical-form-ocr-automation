@@ -1,38 +1,32 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { AiOutlineFileSearch, AiOutlineFolderOpen, AiOutlineUser, AiOutlineCheckCircle, AiOutlineFileExcel, AiOutlineCloseCircle } from 'react-icons/ai';
+import { AiOutlineFileSearch, AiOutlineUser, AiOutlineCheckCircle, AiOutlineFileExcel, AiOutlineCloseCircle } from 'react-icons/ai';
 import { FaPlay } from 'react-icons/fa';
 
 function App() {
   const [patientId, setPatientId] = useState('');
-  const [outputFolder, setOutputFolder] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-
-  const handleSelectOutputFolder = async () => {
-    const folderPath = await window.electronAPI.openFolder();
-    if (folderPath) setOutputFolder(folderPath);
-  };
-
-  const handleSelectFiles = async () => {
-    const files = await window.electronAPI.openFiles();
-    if (files) setSelectedFiles(files);
+  const handleSelectFiles = (e) => {
+    setSelectedFiles([...e.target.files]);
   };
 
   const handleProcess = async () => {
-    if (!patientId || !outputFolder || selectedFiles.length === 0) {
-      alert("❗ Please fill in all required fields.");
+    if (!patientId || selectedFiles.length === 0) {
+      alert("❗ Please provide Patient ID and select files.");
       return;
     }
 
+    const formData = new FormData();
+    formData.append("patient_id", patientId);
+    selectedFiles.forEach(file => formData.append("files", file));
+
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:8000/process', {
-        patient_id: patientId,
-        output_folder: outputFolder,
-        selected_files: selectedFiles
+      const res = await axios.post('http://localhost:8000/process', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
       setResult(res.data);
     } catch (err) {
@@ -69,21 +63,13 @@ function App() {
         
         <div style={{ marginBottom: 16 }}>
           <label> Files to Process:</label><br />
-          <button onClick={handleSelectFiles}>Select Files</button>
+          <input type="file" multiple onChange={handleSelectFiles} />
           <ul>
             {selectedFiles.map((file, idx) => (
-              <li key={idx} style={{ fontSize: '0.9em' }}>{file}</li>
+              <li key={idx} style={{ fontSize: '0.9em' }}>{file.name}</li>
             ))}
           </ul>
         </div>
-
-        <div style={{ marginBottom: 16 }}>
-          <label><AiOutlineFolderOpen /> Output Folder:</label><br />
-          <button onClick={handleSelectOutputFolder}>Select Folder</button>
-          <p style={pathStyle}>{outputFolder || 'No folder selected'}</p>
-        </div>
-
-
 
         <div style={{ textAlign: 'center' }}>
           <button
@@ -131,13 +117,6 @@ const inputStyle = {
   marginTop: 4,
   borderRadius: 6,
   border: '1px solid #ccc',
-  fontFamily: 'Inter, Segoe UI, sans-serif'
-};
-
-const pathStyle = {
-  fontSize: '0.85em',
-  color: '#555',
-  marginTop: 4,
   fontFamily: 'Inter, Segoe UI, sans-serif'
 };
 
