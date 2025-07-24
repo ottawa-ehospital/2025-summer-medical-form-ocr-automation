@@ -10,15 +10,6 @@ It supports image/PDF uploads, processes them via an LLM-enhanced OCR pipeline, 
 	•	FastAPI backend with CORS support
 	•	Fixed output folder for simplified deployment
 
- OCR/
-│── backend/           # FastAPI backend
-│   ├── app.py         # API entry point
-│   ├── OCR/           # OCR + data processing logic
-│   ├── venv/          # Python virtual environment (ignored in Git)
-│── frontend/          # React frontend
-│   ├── src/           # React components
-│   ├── package.json   # Frontend dependencies
-│── README.md
 
 #####Backend (Python)######
 	•	Python 3.10+
