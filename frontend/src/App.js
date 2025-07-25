@@ -4,24 +4,28 @@ import { AiOutlineFileSearch, AiOutlineUser, AiOutlineCheckCircle, AiOutlineFile
 import { FaPlay } from 'react-icons/fa';
 
 function App() {
-  const [patientId, setPatientId] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSelectFiles = (e) => {
-    setSelectedFiles([...e.target.files]);
+  // Handle file selection (upload)
+  const handleFileSelect = (event) => {
+    setSelectedFiles(event.target.files);
   };
 
   const handleProcess = async () => {
-    if (!patientId || selectedFiles.length === 0) {
-      alert("❗ Please provide Patient ID and select files.");
+    if (!identifier || selectedFiles.length === 0) {
+      alert("Please provide Patient ID or Name and select at least one file.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("patient_id", patientId);
-    selectedFiles.forEach(file => formData.append("files", file));
+    formData.append('patient_id', identifier);
+    formData.append('patient_name', identifier);
+    for (let file of selectedFiles) {
+      formData.append('files', file);
+    }
 
     setLoading(true);
     try {
@@ -51,26 +55,29 @@ function App() {
           <AiOutlineFileSearch /> Medical Document Processing System
         </h2>
 
+        {/* Identifier input */}
         <div style={{ marginBottom: 16 }}>
-          <label><AiOutlineUser /> Patient ID:</label><br />
+          <label><AiOutlineUser /> Patient ID or Name (enter at least one):</label><br />
           <input
-            value={patientId}
-            onChange={e => setPatientId(e.target.value)}
-            placeholder="e.g. P123"
+            value={identifier}
+            onChange={e => setIdentifier(e.target.value)}
+            placeholder="e.g. P123 or JohnDoe"
             style={inputStyle}
           />
         </div>
-        
+
+        {/* File upload */}
         <div style={{ marginBottom: 16 }}>
-          <label> Files to Process:</label><br />
-          <input type="file" multiple onChange={handleSelectFiles} />
+          <label>Files to Process:</label><br />
+          <input type="file" multiple onChange={handleFileSelect} />
           <ul>
-            {selectedFiles.map((file, idx) => (
+            {Array.from(selectedFiles).map((file, idx) => (
               <li key={idx} style={{ fontSize: '0.9em' }}>{file.name}</li>
             ))}
           </ul>
         </div>
 
+        {/* Process button */}
         <div style={{ textAlign: 'center' }}>
           <button
             onClick={handleProcess}
@@ -88,6 +95,7 @@ function App() {
           </button>
         </div>
 
+        {/* Result */}
         {result && (
           <div style={{ marginTop: 30, padding: 20, backgroundColor: '#f1f1f1', borderRadius: 8 }}>
             <h4><AiOutlineCheckCircle /> Processing Result</h4>
@@ -105,19 +113,3 @@ function App() {
               </>
             )}
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-const inputStyle = {
-  width: '100%',
-  padding: 8,
-  marginTop: 4,
-  borderRadius: 6,
-  border: '1px solid #ccc',
-  fontFamily: 'Inter, Segoe UI, sans-serif'
-};
-
-export default App;
